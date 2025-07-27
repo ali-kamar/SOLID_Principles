@@ -27,7 +27,12 @@ class Payment(ABC):
     def pay(self, order):
         pass
 
-class SMSAUTH():
+class Authorizer(ABC):
+    @abstractmethod
+    def is_verified(self) -> bool:
+        pass
+
+class SMSAUTH(Authorizer):
     verified = False
 
     def auth_sms(self, code):
@@ -39,7 +44,7 @@ class SMSAUTH():
     
 
 class DebitPay(Payment):
-    def __init__(self, security_code, authorizer: SMSAUTH):
+    def __init__(self, security_code, authorizer: Authorizer):
         self.security_code = security_code
         self.authorizer = authorizer
 
@@ -61,7 +66,7 @@ class CreditPay(Payment):
         order.status = "paid"
 
 class PaypalPay(Payment):
-    def __init__(self, email_address, authorizer: SMSAUTH):
+    def __init__(self, email_address, authorizer: Authorizer):
         self.email_address = email_address
         self.authorizer = authorizer
 
