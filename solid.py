@@ -4,7 +4,7 @@
 # Liskov Substitution Principle (LSP)
 # Interface Segregation Principle (ISP)
 # Dependency Inversion Principle (DIP)
-
+from abc import ABC, abstractmethod
 class Order:
     items = []
     quantities = []
@@ -22,14 +22,24 @@ class Order:
             total += self.quantities[i] * self.prices[i]
         return total    
         
-class PaymentProcessor:
-    def pay_debit(self, order, security_code):
+class Payment(ABC):
+    @abstractmethod
+    def pay(self, order, security_code):
+        pass
+
+class DebitPay(Payment):
+    def pay(self, order, security_code):
         print("Processing debit payment...")
         print(f"Security code: {security_code}")
         order.status = "paid"
-    
-    def pay_credit(self, order, security_code):
+class CreditPay(Payment):
+    def pay(self, order, security_code):
         print("Processing credit payment...")
+        print(f"Security code: {security_code}")
+        order.status = "paid"
+class Paypal(Payment):
+    def pay(self, order, security_code):
+        print("Processing paypal payment...")
         print(f"Security code: {security_code}")
         order.status = "paid"
         
@@ -39,5 +49,5 @@ order.add_item("SSD", 1, 150)
 order.add_item("USB cable", 2, 5)
 
 print(order.total_price())
-processor = PaymentProcessor()
-processor.pay_debit(order, "1234-5678-9012-3456")
+processor = Paypal()
+processor.pay(order, "1234-5678-9012-3456")
