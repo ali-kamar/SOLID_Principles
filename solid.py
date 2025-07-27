@@ -24,23 +24,30 @@ class Order:
         
 class Payment(ABC):
     @abstractmethod
-    def pay(self, order, security_code):
+    def pay(self, order):
         pass
 
 class DebitPay(Payment):
-    def pay(self, order, security_code):
+    def __init__(self, security_code):
+        self.security_code = security_code
+
+    def pay(self, order):
         print("Processing debit payment...")
-        print(f"Security code: {security_code}")
+        print(f"Security code: {self.security_code}")
         order.status = "paid"
 class CreditPay(Payment):
-    def pay(self, order, security_code):
+    def __init__(self, security_code):
+        self.security_code = security_code
+    def pay(self, order):
         print("Processing credit payment...")
-        print(f"Security code: {security_code}")
+        print(f"Security code: {self.security_code}")
         order.status = "paid"
-class Paypal(Payment):
-    def pay(self, order, security_code):
+class PaypalPay(Payment):
+    def __init__(self, email_address):
+        self.email_address = email_address
+    def pay(self, order):
         print("Processing paypal payment...")
-        print(f"Security code: {security_code}")
+        print(f"Email Address: {self.email_address}")
         order.status = "paid"
         
 order = Order()
@@ -49,5 +56,5 @@ order.add_item("SSD", 1, 150)
 order.add_item("USB cable", 2, 5)
 
 print(order.total_price())
-processor = Paypal()
-processor.pay(order, "1234-5678-9012-3456")
+processor = PaypalPay("ali@gmail.com")
+processor.pay(order)
