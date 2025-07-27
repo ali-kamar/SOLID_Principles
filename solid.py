@@ -27,26 +27,30 @@ class Payment(ABC):
     def pay(self, order):
         pass
 
-class Payment_SMS(Payment):
-    @abstractmethod
-    def auth_sms(self, code):
-        pass
-
-class DebitPay(Payment_SMS):
-    def __init__(self, security_code):
-        self.security_code = security_code
-        self.verified = False
+class SMSAUTH():
+    verified = False
 
     def auth_sms(self, code):
         print(f"Authenticating SMS... {code}")
         self.verified = True
 
+    def is_verified(self) -> bool:
+        return self.verified
+    
+
+class DebitPay(Payment):
+    def __init__(self, security_code, authorizer: SMSAUTH):
+        self.security_code = security_code
+        self.authorizer = authorizer
+
+
     def pay(self, order):
-        if not self.verified:
+        if not self.authorizer.is_verified():
             raise Exception("Payment not verified. Please authenticate first.")
         print("Processing debit payment...")
         print(f"Security code: {self.security_code}")
         order.status = "paid"
+
 class CreditPay(Payment):
     def __init__(self, security_code):
         self.security_code = security_code
@@ -55,17 +59,14 @@ class CreditPay(Payment):
         print("Processing credit payment...")
         print(f"Security code: {self.security_code}")
         order.status = "paid"
-class PaypalPay(Payment_SMS):
-    def __init__(self, email_address):
-        self.email_address = email_address
-        self.verified = False
 
-    def auth_sms(self, code):
-        print(f"Authenticating SMS... {code}")
-        self.verified = True
+class PaypalPay(Payment):
+    def __init__(self, email_address, authorizer: SMSAUTH):
+        self.email_address = email_address
+        self.authorizer = authorizer
 
     def pay(self, order):
-        if not self.verified:
+        if not self.authorizer.is_verified():
             raise Exception("Payment not verified. Please authenticate first.")
         print("Processing paypal payment...")
         print(f"Email Address: {self.email_address}")
@@ -77,6 +78,7 @@ order.add_item("SSD", 1, 150)
 order.add_item("USB cable", 2, 5)
 
 print(order.total_price())
-processor = PaypalPay("ali@gmail.com")
-processor.auth_sms("123456")
+authorizer = SMSAUTH()
+processor = PaypalPay("ali@gmail.com", authorizer)
+authorizer.auth_sms("123456")
 processor.pay(order)
