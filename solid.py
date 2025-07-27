@@ -27,25 +27,46 @@ class Payment(ABC):
     def pay(self, order):
         pass
 
-class DebitPay(Payment):
+class Payment_SMS(Payment):
+    @abstractmethod
+    def auth_sms(self, code):
+        pass
+
+class DebitPay(Payment_SMS):
     def __init__(self, security_code):
         self.security_code = security_code
+        self.verified = False
+
+    def auth_sms(self, code):
+        print(f"Authenticating SMS... {code}")
+        self.verified = True
 
     def pay(self, order):
+        if not self.verified:
+            raise Exception("Payment not verified. Please authenticate first.")
         print("Processing debit payment...")
         print(f"Security code: {self.security_code}")
         order.status = "paid"
 class CreditPay(Payment):
     def __init__(self, security_code):
         self.security_code = security_code
+
     def pay(self, order):
         print("Processing credit payment...")
         print(f"Security code: {self.security_code}")
         order.status = "paid"
-class PaypalPay(Payment):
+class PaypalPay(Payment_SMS):
     def __init__(self, email_address):
         self.email_address = email_address
+        self.verified = False
+
+    def auth_sms(self, code):
+        print(f"Authenticating SMS... {code}")
+        self.verified = True
+
     def pay(self, order):
+        if not self.verified:
+            raise Exception("Payment not verified. Please authenticate first.")
         print("Processing paypal payment...")
         print(f"Email Address: {self.email_address}")
         order.status = "paid"
@@ -57,4 +78,5 @@ order.add_item("USB cable", 2, 5)
 
 print(order.total_price())
 processor = PaypalPay("ali@gmail.com")
+processor.auth_sms("123456")
 processor.pay(order)
