@@ -20,20 +20,18 @@ class Order:
         total = 0
         for i in range(len(self.prices)):
             total += self.quantities[i] * self.prices[i]
-        return total
+        return total    
+        
+class PaymentProcessor:
+    def pay_debit(self, order, security_code):
+        print("Processing debit payment...")
+        print(f"Security code: {security_code}")
+        order.status = "paid"
     
-    def pay(self, payment_type, security_code):
-        if payment_type == "debit":
-            print("Processing debit payment...")
-            print(f"Security code: {security_code}")
-            self.status = "paid"
-        elif payment_type == "credit":
-            print("Processing credit payment...")
-            print(f"Security code: {security_code}")
-            self.status = "paid"
-
-        else:
-            raise Exception(f"Unsupported payment type, {payment_type} .")
+    def pay_credit(self, order, security_code):
+        print("Processing credit payment...")
+        print(f"Security code: {security_code}")
+        order.status = "paid"
         
 order = Order()
 order.add_item("Keyboard", 1, 50)
@@ -41,4 +39,5 @@ order.add_item("SSD", 1, 150)
 order.add_item("USB cable", 2, 5)
 
 print(order.total_price())
-order.pay("debit", "1234-5678-9012-3456")
+processor = PaymentProcessor()
+processor.pay_debit(order, "1234-5678-9012-3456")
